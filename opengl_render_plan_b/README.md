@@ -9,7 +9,8 @@ render active viewport as an image considering OpenGL draw callbacks
 *<!> still WIP and Buggy*
 
 ## Installation
-`Blender User Preference` > `Install from File` > Select `opengl_render_plan_b.py`
+1. `Blender User Preference` > `Install from File` > Select `opengl_render_plan_b.py`
+2. Activate `3D View: OpenGL Render Plan B` in Addons Preference
 
 ## Usage
 
