@@ -6,7 +6,7 @@ bl_info = {
     "name": "OpenGL Render Plan B",
     "description": "save active viewport as an image file considering OpenGL draw callbacks",
     "author": "nk",
-    "version": (0, 1),
+    "version": (0, 1, 1),
     "blender": (2, 7, 9),
     "location": "3D View > Header",
     "category": '3D View'
@@ -39,7 +39,7 @@ class OGLRPlB_Panel(bpy.types.Header):
 
         row2 = row.row(align=True)
         row2.active = context.space_data.region_3d.view_perspective == 'CAMERA'
-        op = row.operator(OGLRPlB_Operator.bl_idname, text='', icon='CURSOR')
+        op = row2.operator(OGLRPlB_Operator.bl_idname, text='', icon='CURSOR')
         op.mode = 'CENTER_CAMERA_VIEW'
 
         op = row.operator(OGLRPlB_Operator.bl_idname, text='', icon='RENDER_STILL')
