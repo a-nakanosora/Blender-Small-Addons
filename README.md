@@ -2,3 +2,4 @@
 blender small addons
 
 - OpenGL Render Plan B
+- AniMask
