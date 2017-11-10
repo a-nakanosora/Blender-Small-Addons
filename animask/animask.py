@@ -358,15 +358,8 @@ def draw_callback_3d(self, context):
                     v *= quadscale
 
                     cs = [(1,1,1,alpha), (1,1,1,.0), (1,1,1,.0), (1,1,1,.0)]
-                    #bgl.glLineWidth(2)
                     bgl.glEnable(bgl.GL_BLEND)
 
-                    """
-                    ref:
-                    OpenGL:アルファブレンディング - code snippets
-                    http://miffysora.wikidot.com/opengl-blending
-                        -- glDepthMask(GL_FALSE)
-                    """
                     bgl.glDepthMask(bgl.GL_FALSE)
 
                     if amset.blendmode==AMBlendMode.AlphaOver:
@@ -387,7 +380,6 @@ def draw_callback_3d(self, context):
                         bgl.glColor4f(1.0, 1.0, 1.0, alpha)
                         bgl.glBindTexture(bgl.GL_TEXTURE_2D, amset.image_texture.bindcode[0])
                         bgl.glBegin(bgl.GL_QUADS)
-                        #draw([q-u-v,q+u-v,q+u+v,q-u+v], cs)
                         ps = [q-u-v,q+u-v,q+u+v,q-u+v]
                         bgl.glTexCoord2f(0.0, 0.0)
                         bgl.glVertex3f(*ps[0])
@@ -401,7 +393,6 @@ def draw_callback_3d(self, context):
                         bgl.glDisable(bgl.GL_TEXTURE_2D)
                     else:
                         bgl.glBegin(bgl.GL_POLYGON)
-                        #draw([q+u+v, q-u+v, q-u-v, q+u-v])
                         draw([q,q+u,q+u+v,q+v], cs)
                         draw([q,q-u,q-u+v,q+v], cs)
                         draw([q,q+u,q+u-v,q-v], cs)
@@ -789,7 +780,6 @@ def register():
         return tuple([(n,n,'') for n in sorted(t.__dict__)])
 
     def prop_updated(self, context):
-        #print('Fletcherite', context.object)
         if context.object.type != 'CURVE':
             return
         curve = context.object
