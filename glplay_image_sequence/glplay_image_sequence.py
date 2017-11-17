@@ -7,7 +7,7 @@ bl_info = {
     "name": "GL Play Image Sequence",
     "description": "Play Image Sequence on Viewport playback",
     "author": "A Nakanosora",
-    "version": (0, 3),
+    "version": (0, 3, 1),
     "blender": (2, 7, 9),
     "location": "3D View > Properties Panel > GLPlay Image Sequence",
     "category": '3D View'
@@ -36,9 +36,19 @@ class State:
     playing = False
     do_clean = None
 
-class BlendMode:
-    ALPHAOVER = 'ALPHAOVER'
-    ADDITIVE = 'ADDITIVE'
+def tautology(s):
+    class _TautologyDict:
+        def __setattr__(*args):
+            raise Exception('tautology dict has only getters')
+    dic = _TautologyDict()
+    for n in s.strip().split():
+        dic.__dict__[n] = n
+    return dic
+
+BlendMode = tautology('''
+    ALPHAOVER
+    ADDITIVE
+''')
 
 class GLTexture():
     def __init__(self, image, frame, frame_offset=0, blendmode=BlendMode.ALPHAOVER):
@@ -398,8 +408,28 @@ def register():
             tex.reload(context.scene.frame_current)
         _tex_on_playing(self, context, f)
 
-    blends = [ (BlendMode.ALPHAOVER, BlendMode.ALPHAOVER, '')
-             , (BlendMode.ADDITIVE, BlendMode.ADDITIVE, '') ]
+    def tautology_to_enumitems(t):
+        def str_to_enumid(s):
+            s = s.upper()
+            if len(s) == 0:
+                return 0
+            k=64
+            head = ord(s[0])+k
+            if len(s) == 1:
+                return head
+            tail = ord(s[-1])+k
+            middle = sum([ord(c)+k for c in s[1:-1]])
+            return int('{}{}{}'.format(head, middle, tail)) % 0xffffff ## <!> `0xffffff` for EnumProperty issue
+        items = tuple([(n,n,'',str_to_enumid(n)) for n in sorted(t.__dict__)])
+        ##
+        check={}
+        for n,_,_,enumid in items:
+            if enumid in check:
+                raise Exception('tautology_to_enumitems Error: detect enum-id duplication: {} / {}'.format(n,enumid))
+            check[enumid] = True
+        return items
+
+    blends = tautology_to_enumitems(BlendMode)
 
     bpy.types.Object.glplay_image = bpy.props.PointerProperty(type=bpy.types.Image)
     bpy.types.Object.glplay_image_offset_frame = bpy.props.IntProperty(default=0, update=prop_update_object)
