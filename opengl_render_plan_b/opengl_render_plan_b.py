@@ -6,7 +6,7 @@ bl_info = {
     "name": "OpenGL Render Plan B",
     "description": "save active viewport as an image file considering OpenGL draw callbacks",
     "author": "nk",
-    "version": (0, 1, 1),
+    "version": (0, 1, 2),
     "blender": (2, 7, 9),
     "location": "3D View > Header",
     "category": '3D View'
@@ -124,7 +124,7 @@ def render_viewport(context, save_image_as_file=False, show_image=False):
     width = region.width
     height = region.height
 
-    out = prepare_blimage(width, height)
+    out = prepare_blimage(width, height, Pref.blimgname)
 
     buffer = bgl.Buffer(bgl.GL_FLOAT, width * height * 4)
     bgl.glReadPixels(x, y, width, height , bgl.GL_RGBA, bgl.GL_FLOAT, buffer)
@@ -142,14 +142,14 @@ def render_viewport(context, save_image_as_file=False, show_image=False):
                     return
         set_imageeditor_image()
 
-def prepare_blimage(width, height):
-    blimgname = Pref.blimgname
-    if blimgname in bpy.data.images and bpy.data.images[blimgname].size[:] != (width,height):
-        bpy.data.images.remove(bpy.data.images[blimgname])
-        out = bpy.data.images.new(blimgname, width, height)
-    elif blimgname not in bpy.data.images:
-        out = bpy.data.images.new(blimgname, width, height)
-    return bpy.data.images[blimgname]
+def prepare_blimage(width, height, name='output'):
+    if name in bpy.data.images:
+        img = bpy.data.images[name]
+        if img.size[:] != (width,height):
+            img.scale(width,height)
+    else:
+        img = bpy.data.images.new(name, width, height)
+    return img
 
 def register():
     bpy.utils.register_class(OGLRPlB_Panel)
