@@ -2,6 +2,8 @@
 
 Play image sequence on viewport playback
 
+> [**Download**](https://raw.githubusercontent.com/a-nakanosora/Blender-Small-Addons/master/glplay_image_sequence/glplay_image_sequence.py)
+
 ![image](./doc/a.gif)
 
 ## Installation
