@@ -2,6 +2,8 @@
 
 render active viewport as an image considering OpenGL draw callbacks
 
+[Download (opengl_render_plan_b.py)](https://raw.githubusercontent.com/a-nakanosora/Blender-Small-Addons/master/opengl_render_plan_b/opengl_render_plan_b.py)
+
 ![image](./doc/a.jpg)
 
 <img width="400" src="./doc/c.jpg">
