@@ -2,6 +2,10 @@
 
 Quick make a mask image for composite
 
+
+> [**Download**](https://raw.githubusercontent.com/a-nakanosora/Blender-Small-Addons/master/komb/komb.py)
+
+
 ![image](./docs/a.gif)
 
 ## Installation
