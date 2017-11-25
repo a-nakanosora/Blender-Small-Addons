@@ -9,3 +9,12 @@ Play image sequence on viewport playback
 ## Installation
 1. `Blender User Preference` > `Install from File` > Select `glplay_image_sequence.py`
 2. Activate `3D View: GL Play Image Sequence` in Addons Preference
+
+
+## Usage
+
+#### Object Options:
+  * `Active Object Image` : Select an image sequence
+  * `Frame Offset` : Offset start frame of player
+  * `BlendMode`
+  * `Transparency` : Use when active image sequence has transparency. (<!> but sometimes it may cause strange behaviour.)
