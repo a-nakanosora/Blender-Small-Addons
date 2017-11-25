@@ -7,7 +7,7 @@ bl_info = {
     "name": "GL Play Image Sequence",
     "description": "Play Image Sequence on Viewport playback",
     "author": "A Nakanosora",
-    "version": (0, 4),
+    "version": (0, 4, 1),
     "blender": (2, 7, 9),
     "location": "3D View > Properties Panel > GLPlay Image Sequence",
     "category": '3D View'
@@ -163,7 +163,7 @@ def draw_callback(self, context, draw_timing):
                  for obj,tex in zip(State.glplay_objs, State.glplay_texs)
                  if obj.glplay_use_transparent]
     ## z-sort
-    ots = sorted(ots, reverse=True)
+    ots = sorted(ots, reverse=True, key=lambda x:x[0])
 
     draw_callback_common(self, context, ots)
 
