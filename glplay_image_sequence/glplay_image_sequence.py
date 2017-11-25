@@ -7,7 +7,7 @@ bl_info = {
     "name": "GL Play Image Sequence",
     "description": "Play Image Sequence on Viewport playback",
     "author": "A Nakanosora",
-    "version": (0, 3, 1),
+    "version": (0, 4),
     "blender": (2, 7, 9),
     "location": "3D View > Properties Panel > GLPlay Image Sequence",
     "category": '3D View'
@@ -149,22 +149,39 @@ def create_mesh_obj(scene, width, height):
 
 
 
-def draw_callback(self, context):
+def draw_callback(self, context, draw_timing):
+    assert draw_timing in {'PRE', 'POST'}
+
+    viewloc = context.space_data.region_3d.view_matrix.inverted().translation
+    if draw_timing == 'PRE':
+        ots = [((obj.location-viewloc).length, obj, tex)
+                 for obj,tex in zip(State.glplay_objs, State.glplay_texs)
+                 if not obj.glplay_use_transparent]
+
+    elif draw_timing == 'POST':
+        ots = [((obj.location-viewloc).length, obj, tex)
+                 for obj,tex in zip(State.glplay_objs, State.glplay_texs)
+                 if obj.glplay_use_transparent]
+    ## z-sort
+    ots = sorted(ots, reverse=True)
+
+    draw_callback_common(self, context, ots)
+
+
+def draw_callback_common(self, context, ots):
+    if Pref.use_alpha_clip:
+        bgl.glAlphaFunc(bgl.GL_GREATER, 0.1)
+        bgl.glEnable(bgl.GL_ALPHA_TEST)
+
+    orig_is_enabled_depthtest = bgl.glIsEnabled(bgl.GL_DEPTH_TEST)
+    bgl.glEnable(bgl.GL_DEPTH_TEST)
 
     bgl.glColor4f(1.0, 1.0, 1.0, 1.0)
     bgl.glEnable(bgl.GL_BLEND)
     bgl.glEnable(bgl.GL_TEXTURE_2D)
 
-    if Pref.use_alpha_clip:
-        bgl.glAlphaFunc(bgl.GL_GREATER, 0.1)
-        bgl.glEnable(bgl.GL_ALPHA_TEST)
-
     texcos = [(0.,0.), (1.,0.), (1.,1.), (0.,1.)]
 
-    ## z-sort
-    viewloc = context.space_data.region_3d.view_matrix.inverted().translation
-    ots = [((obj.location-viewloc).length, obj, tex) for obj,tex in zip(State.glplay_objs, State.glplay_texs)]
-    ots = sorted(ots, reverse=True)
 
     fr = context.scene.frame_current
     for l,obj,tex in ots:
@@ -182,13 +199,15 @@ def draw_callback(self, context):
             bgl.glVertex3f(*p)
         bgl.glEnd()
 
+    #bgl.glDepthMask(bgl.GL_TRUE)
     bgl.glBlendFunc(bgl.GL_SRC_ALPHA, bgl.GL_ONE_MINUS_SRC_ALPHA)
     bgl.glBlendEquation(bgl.GL_FUNC_ADD)
     bgl.glDisable(bgl.GL_TEXTURE_2D)
     bgl.glDisable(bgl.GL_BLEND)
     if Pref.use_alpha_clip:
         bgl.glDisable(bgl.GL_ALPHA_TEST)
-
+    if not orig_is_enabled_depthtest:
+        bgl.glDisable(bgl.GL_DEPTH_TEST)
 
 class GLPlay_Operator(bpy.types.Operator):
     bl_idname = "view3d.glplay_operator"
@@ -196,7 +215,8 @@ class GLPlay_Operator(bpy.types.Operator):
 
     mode = bpy.props.StringProperty(default='')
 
-    _handle_draw = None
+    _handle_draw_pre = None
+    _handle_draw_post = None
     _on_frame_change = None
 
     @classmethod
@@ -230,7 +250,8 @@ class GLPlay_Operator(bpy.types.Operator):
                 State.glplay_objs = [obj for obj in context.scene.objects if obj.glplay_image and not obj.hide]
                 State.glplay_texs = [GLTexture(obj.glplay_image, frame, obj.glplay_image_offset_frame, obj.glplay_blendmode) for obj in State.glplay_objs]
 
-                self._handle_draw = bpy.types.SpaceView3D.draw_handler_add(draw_callback, (self, context), 'WINDOW', 'POST_VIEW')
+                self._handle_draw_pre = bpy.types.SpaceView3D.draw_handler_add(draw_callback, (self, context, 'PRE'), 'WINDOW', 'PRE_VIEW')
+                self._handle_draw_post = bpy.types.SpaceView3D.draw_handler_add(draw_callback, (self, context, 'POST'), 'WINDOW', 'POST_VIEW')
                 State.playing = True
 
                 def on_frame_change(scene):
@@ -264,9 +285,11 @@ class GLPlay_Operator(bpy.types.Operator):
 
 
     def clean(self, context):
-        if self._handle_draw is not None:
-            bpy.types.SpaceView3D.draw_handler_remove(self._handle_draw, 'WINDOW')
-            self._handle_draw = None
+        if self._handle_draw_pre is not None:
+            bpy.types.SpaceView3D.draw_handler_remove(self._handle_draw_pre, 'WINDOW')
+            bpy.types.SpaceView3D.draw_handler_remove(self._handle_draw_post, 'WINDOW')
+            self._handle_draw_pre = None
+            self._handle_draw_post = None
             State.playing = False
 
         if self._on_frame_change in bpy.app.handlers.frame_change_pre:
@@ -376,6 +399,7 @@ class GLPlay_Panel(bpy.types.Panel):
             row.prop(context.object, 'glplay_image', text='')
             col.prop(context.object, 'glplay_image_offset_frame', text='Frame Offset')
             col.prop(context.object, 'glplay_blendmode', text='Blend Mode')
+            col.prop(context.object, 'glplay_use_transparent', text='Transparency')
 
 
 
@@ -433,6 +457,7 @@ def register():
 
     bpy.types.Object.glplay_image = bpy.props.PointerProperty(type=bpy.types.Image)
     bpy.types.Object.glplay_image_offset_frame = bpy.props.IntProperty(default=0, update=prop_update_object)
+    bpy.types.Object.glplay_use_transparent = bpy.props.BoolProperty(default=False, update=prop_update_object)
     bpy.types.Object.glplay_blendmode = bpy.props.EnumProperty(items=blends, default=BlendMode.ALPHAOVER, update=prop_update_object)
     bpy.types.Scene.glplay_selected_image = bpy.props.PointerProperty(type=bpy.types.Image)
 
@@ -446,6 +471,7 @@ def register():
 def unregister():
     del bpy.types.Object.glplay_image
     del bpy.types.Object.glplay_image_offset_frame
+    del bpy.types.Object.glplay_use_transparent
     del bpy.types.Object.glplay_blendmode
     del bpy.types.Scene.glplay_selected_image
     bpy.utils.unregister_class(GLPlay_Panel)
