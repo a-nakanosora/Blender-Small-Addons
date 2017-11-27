@@ -2,7 +2,7 @@ bl_info = {
     'name': 'Render Path Auto Replacer',
     'description': 'Replace render output filepaths at rendering according to several syntaxes',
     'author': 'A Nakanosora',
-    'version': (1, 3),
+    'version': (1, 3, 1),
     'blender': (2, 78, 0),
     'location': 'Render Settings > Output',
     'warning': '',
@@ -48,7 +48,7 @@ def apply_path_macro(scene, path):
     time = str(int(t))
     path_next = path.replace('$file', filename)             \
                     .replace('$scene', scene.name)          \
-                    .replace('$camera', scene.camera.name)  \
+                    .replace('$camera', scene.camera.name if scene.camera else '(camera none)')  \
                     .replace('$timestamp', timestamp)       \
                     .replace('$time', time)
 
