@@ -5,3 +5,4 @@ blender small addons
 - [AniMask](./animask/)
 - [GL Play Image Sequence](./glplay_image_sequence/)
 - [Komb](./komb/)
+- [Render Path Auto Replacer](./render_path_auto_replacer)
