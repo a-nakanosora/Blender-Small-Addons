@@ -13,4 +13,4 @@ Activate hotkeys - jump to prev/next property type
 
 ## Usage
 
-Press hotkey `F1` / `F2` to jump prroperty type to prev/next
+Press hotkey `F1` / `F2` to jump property type to prev/next
