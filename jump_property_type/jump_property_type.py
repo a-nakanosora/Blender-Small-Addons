@@ -5,7 +5,7 @@ bl_info = {
     'name': 'Jump to Prev/Next Property Type',
     'description': 'Activate hotkeys - jump to prev/next property type',
     'author': 'A Nakanosora',
-    'version': (0, 2, 1),
+    'version': (0, 2, 2),
     'blender': (2, 6, 4),
     'location': 'Key (default: [F1]/[F2])',
     'category': 'UI'
@@ -55,25 +55,33 @@ def jump_prop_type(offset=0):
     prop_area.context = type_list[idx]
 
 
+addon_keymaps = []
 
 def register():
     bpy.utils.register_class(JumpPropertyTypeOperator)
 
+    ###
     wm = bpy.context.window_manager
-    km = wm.keyconfigs.active.keymaps['Window']
-    kmi = km.keymap_items.new(JumpPropertyTypeOperator.bl_idname, 'F2', 'PRESS', head=True)
+    km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
+
+    kmi = km.keymap_items.new(JumpPropertyTypeOperator.bl_idname, 'F2', 'PRESS')
     kmi.properties.mode = 'NEXT'
-    kmi = km.keymap_items.new(JumpPropertyTypeOperator.bl_idname, 'F1', 'PRESS', head=True)
+    kmi = km.keymap_items.new(JumpPropertyTypeOperator.bl_idname, 'F1', 'PRESS')
     kmi.properties.mode = 'PREV'
 
-def unregister():
-    wm = bpy.context.window_manager
-    km = wm.keyconfigs.active.keymaps['Window']
-    for kmi in km.keymap_items[:]:
-       if kmi.idname == JumpPropertyTypeOperator.bl_idname:
-            km.keymap_items.remove(kmi)
+    addon_keymaps.append(km)
 
+def unregister():
     bpy.utils.unregister_class(JumpPropertyTypeOperator)
+
+    ###
+    wm = bpy.context.window_manager
+    for km in addon_keymaps:
+        for kmi in km.keymap_items[:]:
+           if kmi.idname == JumpPropertyTypeOperator.bl_idname:
+                km.keymap_items.remove(kmi)
+        wm.keyconfigs.addon.keymaps.remove(km)
+    addon_keymaps.clear()
 
 
 
