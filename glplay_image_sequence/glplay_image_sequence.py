@@ -7,7 +7,7 @@ bl_info = {
     "name": "GL Play Image Sequence",
     "description": "Play Image Sequence on Viewport playback",
     "author": "A Nakanosora",
-    "version": (0, 4, 1),
+    "version": (0, 4, 2),
     "blender": (2, 7, 9),
     "location": "3D View > Properties Panel > GLPlay Image Sequence",
     "category": '3D View'
@@ -230,8 +230,7 @@ class GLPlay_Operator(bpy.types.Operator):
         if not State.playing:
             self.clean(context)
             context.area.tag_redraw()
-            #return {'CANCELLED'}
-            return {'PASS_THROUGH'}
+            return {'FINISHED'}
 
         if context.area:
             context.area.tag_redraw()
