@@ -10,3 +10,4 @@ blender small addons
 ### Misc/UI
 - [Render Path Auto Replacer](./render_path_auto_replacer)
 - [Jump to Prev/Next Property Type](./jump_property_type)
+- [Bl Console History Menu](./bl_console_history_menu)
